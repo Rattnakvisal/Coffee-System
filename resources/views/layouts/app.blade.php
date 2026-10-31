@@ -18,10 +18,14 @@
             }
         })();
     </script>
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:ital,wght@0,300..700;1,300..700&family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/css/index.css', 'resources/js/app.js'])
 </head>
 
-<body class="min-h-screen bg-[#f3f1ef] text-[#2f241f]">
+<body class="min-h-screen bg-[#fbf9f6] text-[#2c221e] font-sans antialiased selection:bg-[#f4a06b]/30 selection:text-[#78350f]">
     @yield('content')
 </body>
 

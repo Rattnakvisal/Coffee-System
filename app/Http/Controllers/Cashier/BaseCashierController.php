@@ -430,7 +430,8 @@ class BaseCashierController extends Controller
         string $orderNumber,
         string $paymentMethod,
         float $amountReceived,
-        float $changeAmount
+        float $changeAmount,
+        array $paymentDetails = []
     ): array {
         $orderMeta = [
             'payment_method' => $paymentMethod,
@@ -443,6 +444,7 @@ class BaseCashierController extends Controller
             'subtotal' => $cartState['subtotal'],
             'discount' => $cartState['discount'],
             'total' => $cartState['total'],
+            'payment_details' => json_encode($paymentDetails, JSON_THROW_ON_ERROR),
         ];
 
         $cashierId = $request->user()?->hasRole('cashier')

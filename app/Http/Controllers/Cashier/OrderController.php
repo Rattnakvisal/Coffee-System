@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Cashier;
 
 use App\Models\Product;
+use App\Services\PosPaymentService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -95,15 +96,24 @@ class OrderController extends BaseCashierController
         return $this->respondCartMutation($request);
     }
 
-    public function placeOrder(Request $request): RedirectResponse|JsonResponse
+    public function placeOrder(Request $request, PosPaymentService $payments): RedirectResponse|JsonResponse
     {
         if ($attendanceGuard = $this->ensureAttendanceChecked($request)) {
             return $attendanceGuard;
         }
 
         $validated = $request->validate([
-            'payment_method' => ['required', Rule::in(self::PAYMENT_METHODS)],
-            'amount_received' => ['nullable', 'numeric', 'min:0'],
+            'payment_method' => ['required', Rule::in(config('payments.card_enabled') ? self::PAYMENT_METHODS : ['cash', 'qr'])],
+            'amount_received' => ['nullable', 'numeric', 'decimal:0,2', 'min:0', 'max:999999.99'],
+            'amount_received_khr' => ['nullable', 'integer', 'min:0', 'max:999999999'],
+            'change_currency' => ['nullable', Rule::in(['USD', 'KHR'])],
+            'payment_currency' => ['nullable', Rule::in(['USD', 'KHR'])],
+            'payment_reference' => ['nullable', 'string', 'max:100'],
+            'payment_confirmed' => ['nullable', 'boolean'],
+            'exchange_rate' => ['required', 'integer', Rule::in([$payments->exchangeRate()])],
+        ], [
+            'exchange_rate.in' => 'The shop exchange rate has changed. Refresh the page and check the payment again.',
+            'exchange_rate.required' => 'Refresh the page to load the shop exchange rate before checkout.',
         ]);
 
         $cartState = $this->buildCartState($request);
@@ -114,20 +124,10 @@ class OrderController extends BaseCashierController
 
         $paymentMethod = (string) $validated['payment_method'];
         $total = (float) $cartState['total'];
-        $amountReceived = (float) ($validated['amount_received'] ?? 0);
-
-        if ($paymentMethod === 'cash' && $amountReceived < $total) {
-            return $this->orderFailureResponse(
-                $request,
-                'Amount received must be greater than or equal to total.'
-            );
-        }
-
-        if ($paymentMethod !== 'cash') {
-            $amountReceived = $total;
-        }
-
-        $changeAmount = max($amountReceived - $total, 0.0);
+        $settlement = $payments->settle($validated, $total);
+        $amountReceived = $settlement['amount_received'];
+        $changeAmount = $settlement['change_amount'];
+        $paymentDetails = $settlement['details'] + ['confirmed_by' => $request->user()?->id];
         $orderNumber = $this->generateOrderNumber();
 
         DB::transaction(function () use (
@@ -136,7 +136,8 @@ class OrderController extends BaseCashierController
             $orderNumber,
             $paymentMethod,
             $amountReceived,
-            $changeAmount
+            $changeAmount,
+            $paymentDetails
         ): void {
             $orderPayload = $this->buildOrderPayload(
                 $request,
@@ -144,7 +145,8 @@ class OrderController extends BaseCashierController
                 $orderNumber,
                 $paymentMethod,
                 $amountReceived,
-                $changeAmount
+                $changeAmount,
+                $paymentDetails
             );
 
             $orderId = (int) DB::table('orders')->insertGetId($orderPayload);
@@ -165,6 +167,7 @@ class OrderController extends BaseCashierController
                 'order_total' => $total,
                 'amount_received' => $amountReceived,
                 'change_amount' => $changeAmount,
+                'payment_details' => $paymentDetails,
                 'cart_html' => $this->renderCartHtml($refreshedCartState),
             ]);
         }

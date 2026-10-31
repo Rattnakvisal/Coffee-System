@@ -1,3 +1,5 @@
+import { initPaymentForm, paymentDraft, formatRiel } from "./cashier_payment";
+
 (function () {
     const root = document.documentElement;
     const overlay = document.querySelector("[data-cashier-overlay]");
@@ -148,62 +150,18 @@
         feedback.classList.remove("hidden");
         feedback.classList.toggle("text-emerald-700", !isError);
         feedback.classList.toggle("text-red-600", !!isError);
+        feedback.classList.toggle("bg-emerald-50", !isError);
+        feedback.classList.toggle("bg-red-50", !!isError);
     };
 
-    const initPlaceOrderForm = function (scope) {
-        const rootElement = scope && scope.querySelector ? scope : document;
-        const placeOrderForm = rootElement.querySelector(
-            ".js-place-order-form",
-        );
-        if (!placeOrderForm) return;
-
-        const paymentMethodField = placeOrderForm.querySelector(
-            "[data-payment-method]",
-        );
-        const amountReceivedField = placeOrderForm.querySelector(
-            "[data-amount-received]",
-        );
-        const paymentHint = placeOrderForm.querySelector("[data-payment-hint]");
-        const orderTotal = Math.max(
-            0,
-            Number(placeOrderForm.dataset.orderTotal) || 0,
-        );
-
-        if (!paymentMethodField || !amountReceivedField) return;
-
-        const syncPaymentInputs = function () {
-            const paymentMethod = paymentMethodField.value;
-            const totalString = orderTotal.toFixed(2);
-            const isCashPayment = paymentMethod === "cash";
-
-            amountReceivedField.readOnly = !isCashPayment;
-            amountReceivedField.min = totalString;
-
-            if (!isCashPayment) {
-                amountReceivedField.value = totalString;
-            } else if ((Number(amountReceivedField.value) || 0) < orderTotal) {
-                amountReceivedField.value = totalString;
-            }
-
-            if (paymentHint) {
-                paymentHint.textContent = isCashPayment
-                    ? "For cash payment, received amount should be >= total."
-                    : "For card or QR payment, amount is set to exact total.";
-            }
-        };
-
-        if (placeOrderForm.dataset.paymentBound !== "1") {
-            paymentMethodField.addEventListener("change", syncPaymentInputs);
-            placeOrderForm.dataset.paymentBound = "1";
-        }
-
-        syncPaymentInputs();
-    };
+    const initPlaceOrderForm = initPaymentForm;
 
     const replaceCartHtml = function (html) {
         if (!cart || !html) return;
 
         const wasOpen = !cart.classList.contains("translate-x-full");
+        const draft = paymentDraft(cart);
+        const previousScroll = cart.scrollTop;
         const wrapper = document.createElement("div");
         wrapper.innerHTML = html.trim();
 
@@ -216,7 +174,9 @@
 
         cart.replaceWith(nextCart);
         cart = nextCart;
-        initPlaceOrderForm(nextCart);
+        initPlaceOrderForm(nextCart, draft);
+        nextCart.scrollTop = previousScroll;
+        window.refreshLucideIcons?.();
     };
 
     const submitCartFormAjax = async function (form, submitButton) {
@@ -260,6 +220,9 @@
                 return error.payload;
             }
 
+            if (form.matches(".js-place-order-form")) {
+                return { ok: false, message: "The order could not be confirmed. Check order history before trying again." };
+            }
             form.submit();
             return null;
         } finally {
@@ -267,6 +230,7 @@
             if (submitButton) {
                 submitButton.disabled = false;
             }
+            form.dispatchEvent(new Event("payment:refresh"));
         }
     };
 
@@ -718,17 +682,18 @@
 
         const placeOrderButton =
             placeOrderForm.querySelector("[data-place-order]");
-        const originalLabel = placeOrderButton
-            ? placeOrderButton.textContent
+        const buttonLabel = placeOrderForm.querySelector("[data-place-order-label]");
+        const originalLabel = buttonLabel
+            ? buttonLabel.textContent
             : "";
 
         setPlaceOrderFeedback(placeOrderForm, "", false);
 
-        if (placeOrderButton) {
-            placeOrderButton.textContent = "Placing order...";
+        if (buttonLabel) {
+            buttonLabel.textContent = "Saving sale...";
         }
 
-        showLoading("Processing payment...");
+        showLoading("Saving your order...");
 
         submitCartFormAjax(placeOrderForm, placeOrderButton)
             .then(function (payload) {
@@ -747,41 +712,27 @@
                 const orderNumber = payload.order_number
                     ? String(payload.order_number)
                     : "";
-                const changeAmount = Number(payload.change_amount || 0);
+                const details = payload.payment_details || {};
                 const successMessage =
                     orderNumber !== ""
                         ? "Order " + orderNumber + " placed successfully."
                         : "Order placed successfully.";
-                const thankYouMessage =
-                    orderNumber !== ""
-                        ? "Thank you! Your order " +
-                          orderNumber +
-                          " has been placed successfully."
-                        : "Thank you! Your order has been placed successfully.";
-                const loadingMessage =
-                    changeAmount > 0
-                        ? successMessage +
-                          " Change: $" +
-                          changeAmount.toFixed(2)
-                        : successMessage;
-
-                showLoading(loadingMessage);
-
-                window.setTimeout(function () {
-                    hideLoading();
-                    setPlaceOrderFeedback(
-                        placeOrderForm,
-                        thankYouMessage,
-                        false,
-                    );
-                    window.alert(thankYouMessage);
-                }, 700);
+                let message = successMessage;
+                if (Number(details.change_given) > 0) {
+                    const change = details.change_currency === "KHR"
+                        ? formatRiel(details.change_given)
+                        : "$" + Number(details.change_given).toFixed(2);
+                    message += " Return change: " + change + ".";
+                }
+                hideLoading();
+                setPlaceOrderFeedback(cart.querySelector(".js-place-order-form"), message, false);
             })
             .finally(function () {
-                if (placeOrderButton) {
-                    placeOrderButton.textContent =
+                if (buttonLabel) {
+                    buttonLabel.textContent =
                         originalLabel || "Place an order";
                 }
+                placeOrderForm.dispatchEvent(new Event("payment:refresh"));
             });
     });
 

@@ -1,4 +1,10 @@
 import "./bootstrap";
+import { createIcons, icons } from "lucide";
+
+document.addEventListener("DOMContentLoaded", () => {
+    createIcons({ icons });
+});
+window.refreshLucideIcons = () => createIcons({ icons });
 
 (() => {
     const sidebarScroll = document.querySelector("[data-sidebar-scroll]");

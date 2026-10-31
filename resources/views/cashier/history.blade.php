@@ -17,110 +17,110 @@
             ->values();
     @endphp
 
-    <div class="anim-enter-up w-full min-h-screen overflow-hidden bg-white/85 lg:overflow-visible">
+    <div class="anim-enter-up w-full min-h-screen overflow-hidden bg-[#fbf9f6] lg:overflow-visible">
         <div class="grid min-h-screen grid-cols-1 lg:grid-cols-12">
-            <div data-cashier-overlay class="fixed inset-0 z-40 hidden bg-[#1f1713]/50 backdrop-blur-[1px] lg:hidden"></div>
+            <!-- Mobile Overlay -->
+            <div data-cashier-overlay class="fixed inset-0 z-40 hidden bg-[#1f1713]/50 backdrop-blur-xs lg:hidden"></div>
+            
+            <!-- Left Navigation Sidebar -->
             @include('cashier.sidebar.sidebar', ['activeCashierMenu' => 'history'])
 
+            <!-- Main Workspace -->
             <main
-                class="anim-enter-up anim-delay-100 bg-[#f8f8f8] p-4 pt-20 sm:p-6 sm:pt-20 lg:col-span-6 lg:p-6 lg:pt-6 xl:col-span-7">
-                <div class="mb-4 flex items-center justify-between gap-2 lg:hidden">
+                class="anim-enter-up anim-delay-100 custom-scrollbar bg-[#fbf9f6] p-4 pt-18 sm:p-6 sm:pt-20 lg:col-span-6 lg:p-7 xl:col-span-7">
+                
+                <!-- Mobile Navigation Bar -->
+                <div class="mb-5 flex items-center justify-between gap-3 rounded-2xl border border-[#ebdcd2] bg-white/95 backdrop-blur-md p-3 shadow-xs lg:hidden">
                     <button type="button" data-cashier-open-menu
-                        class="inline-flex items-center gap-2 rounded-xl border border-[#e9d8cc] bg-white px-3 py-2 text-sm font-semibold text-[#6d4e3f] shadow-sm">
-                        Menu
+                        class="inline-flex items-center gap-2 rounded-xl border border-[#ebdcd2] bg-[#fbf5f0] px-3.5 py-2 text-xs font-bold text-[#665044] shadow-xs active:scale-95 transition">
+                        <x-icon name="menu" class="h-4 w-4 text-[#b45309]" />
+                        <span>Menu</span>
                     </button>
                     <button type="button" data-cashier-open-cart
-                        class="inline-flex items-center gap-2 rounded-xl bg-[#f4a06b] px-3 py-2 text-sm font-semibold text-white shadow-sm">
-                        Cart
+                        class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#e07a3c] to-[#b45309] px-4 py-2 text-xs font-bold text-white shadow-xs active:scale-95 transition">
+                        <x-icon name="shopping-bag" class="h-4 w-4" />
+                        <span>Cart</span>
                     </button>
                 </div>
 
                 @if (session('status'))
-                    <div class="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-                        {{ session('status') }}
+                    <div class="mb-5 flex items-center gap-3 rounded-2xl border border-emerald-200/80 bg-emerald-50/90 px-4 py-3.5 text-xs font-semibold text-emerald-800 shadow-xs">
+                        <x-icon name="check-circle" class="h-5 w-5 shrink-0 text-emerald-600" />
+                        <span>{{ session('status') }}</span>
                     </div>
                 @endif
 
                 @if ($errors->any())
-                    <div class="mb-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-                        {{ $errors->first() }}
+                    <div class="mb-5 flex items-center gap-3 rounded-2xl border border-rose-200/80 bg-rose-50/90 px-4 py-3.5 text-xs font-semibold text-rose-800 shadow-xs">
+                        <x-icon name="alert-circle" class="h-5 w-5 shrink-0 text-rose-600" />
+                        <span>{{ $errors->first() }}</span>
                     </div>
                 @endif
 
+                <!-- History Section Card -->
                 <section
-                    class="mt-6 rounded-[28px] border border-[#efe2d8] bg-white p-4 shadow-[0_18px_45px_rgba(47,36,31,0.07)] sm:p-5">
-                    <div class="mb-4 flex flex-wrap items-start justify-between gap-3">
+                    class="rounded-[28px] border border-[#ebdcd2]/80 bg-white p-5 sm:p-6 shadow-[0_4px_24px_rgba(43,33,27,0.04)]">
+                    <div class="mb-5 flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-[#ebdcd2]/60">
                         <div>
-                            <h3 class="inline-flex items-center gap-2 text-lg font-black text-[#2f241f]">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-[#b16231]" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.9">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M3.75 7.5h16.5m-13.5 4.5h10.5m-10.5 4.5h6m6.75-12.75h-15a1.5 1.5 0 0 0-1.5 1.5v13.5a1.5 1.5 0 0 0 1.5 1.5h15a1.5 1.5 0 0 0 1.5-1.5V5.25a1.5 1.5 0 0 0-1.5-1.5Z" />
-                                </svg>
-                                Order History
-                            </h3>
+                            <span class="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#b45309]">
+                                <span class="h-1.5 w-1.5 rounded-full bg-[#b45309]"></span>
+                                Cashier Transactions
+                            </span>
+                            <h3 class="mt-1 text-2xl font-black tracking-tight text-[#2c221e]">Order History</h3>
                             @if ($orders->count() > 0)
-                                <p class="mt-1 text-xs text-slate-500">
-                                    Showing {{ $orders->firstItem() }}-{{ $orders->lastItem() }} of {{ $orders->total() }}
-                                    orders
+                                <p class="mt-1 text-xs text-[#8a7265]">
+                                    Showing {{ $orders->firstItem() }}-{{ $orders->lastItem() }} of {{ $orders->total() }} total orders
                                 </p>
                             @else
-                                <p class="mt-1 text-xs text-slate-500">No orders match this view</p>
+                                <p class="mt-1 text-xs text-[#8a7265]">No orders match the current filter</p>
                             @endif
                         </div>
 
                         <button type="button" data-history-filter-open aria-controls="history-filter-panel"
                             aria-expanded="false"
-                            class="inline-flex min-h-11 items-center gap-2 rounded-2xl border border-[#e7d7cb] bg-[#fffaf6] px-4 py-2.5 text-sm font-bold text-[#5c4438] shadow-[0_8px_18px_rgba(47,36,31,0.05)] transition hover:-translate-y-0.5 hover:border-[#dfc4b2] hover:bg-white hover:shadow-[0_12px_24px_rgba(47,36,31,0.08)] focus:outline-none focus:ring-2 focus:ring-[#f4a06b]/25">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-[#b16231]" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.9">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M3.75 6h16.5m-13.5 6h10.5m-7.5 6h4.5" />
-                            </svg>
-                            Filter
+                            class="inline-flex items-center gap-2 rounded-xl border border-[#ebdcd2] bg-[#fbf5f0] px-4 py-2.5 text-xs font-bold text-[#665044] shadow-xs transition hover:bg-white hover:border-[#dfc3b2] active:scale-95">
+                            <x-icon name="filter" class="h-4 w-4 text-[#b45309]" />
+                            <span>Filter Orders</span>
                         </button>
                     </div>
 
+                    <!-- Slide-out Filter Panel -->
                     <div data-history-filter-backdrop
-                        class="fixed inset-0 z-[60] hidden bg-[#1f1713]/45 backdrop-blur-[2px]"></div>
+                        class="fixed inset-0 z-[60] hidden bg-[#1f1713]/40 backdrop-blur-xs"></div>
 
                     <div id="history-filter-panel" data-history-filter-panel
-                        class="fixed inset-y-0 right-0 z-[70] hidden w-full max-w-[430px] translate-x-full overflow-y-auto border-l border-[#ead8cb] bg-[linear-gradient(135deg,#fffaf6_0%,#ffffff_58%,#fff4ec_100%)] p-5 shadow-[-24px_0_48px_rgba(47,36,31,0.18)] transition-transform duration-300 ease-out sm:p-6"
+                        class="fixed inset-y-0 right-0 z-[70] hidden w-full max-w-[420px] translate-x-full overflow-y-auto border-l border-[#ebdcd2] bg-white p-6 shadow-2xl transition-transform duration-300 ease-out custom-scrollbar"
                         role="dialog" aria-modal="true" aria-labelledby="history-filter-title">
-                        <div class="mb-6 flex items-start justify-between gap-4">
+                        <div class="mb-6 flex items-start justify-between gap-4 pb-4 border-b border-[#ebdcd2]/60">
                             <div>
-                                <p class="text-xs font-bold uppercase tracking-[0.18em] text-[#b16231]">Reports</p>
-                                <h4 id="history-filter-title" class="mt-1 text-xl font-black tracking-tight text-[#2f241f]">
-                                    Filter Orders
+                                <span class="text-xs font-bold uppercase tracking-wider text-[#b45309]">Search & Sort</span>
+                                <h4 id="history-filter-title" class="mt-1 text-xl font-black tracking-tight text-[#2c221e]">
+                                    Filter History
                                 </h4>
                             </div>
                             <button type="button" data-history-filter-close
-                                class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-[#ead8cb] bg-white text-[#5c4438] shadow-sm transition hover:-translate-y-0.5 hover:bg-[#fff6f0] focus:outline-none focus:ring-2 focus:ring-[#f4a06b]/25"
+                                class="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-[#ebdcd2] bg-[#fbf5f0] text-[#705547] shadow-xs transition hover:bg-white"
                                 aria-label="Close filter">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
-                                    stroke="currentColor" stroke-width="1.9">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
-                                </svg>
+                                <x-icon name="x" class="h-4 w-4" />
                             </button>
                         </div>
-                        <form method="GET" action="{{ route('cashier.history') }}"
-                            class="space-y-4">
+                        <form method="GET" action="{{ route('cashier.history') }}" class="space-y-4">
                             <div>
                                 <label for="history_search"
-                                    class="mb-2 block text-xs font-bold uppercase tracking-[0.16em] text-[#5f7598]">
+                                    class="mb-1.5 block text-xs font-bold uppercase tracking-wider text-[#73594b]">
                                     Search Order
                                 </label>
                                 <input id="history_search" type="text" name="search" value="{{ $search }}"
-                                    placeholder="Order, payment, status"
-                                    class="h-[52px] w-full rounded-2xl border border-[#ead8cb] bg-white px-4 text-sm font-medium text-[#2f241f] shadow-sm outline-none transition placeholder:text-slate-400 hover:border-[#dfc4b2] focus:border-[#f4a06b] focus:ring-4 focus:ring-[#f4a06b]/15">
+                                    placeholder="Order number, payment, or notes"
+                                    class="w-full rounded-xl border border-[#ebdcd2] bg-[#fbf8f5] px-4 py-3 text-xs font-semibold text-[#2c221e] outline-none transition focus:border-[#b45309] focus:ring-2 focus:ring-[#b45309]/15">
                             </div>
                             <div>
                                 <label for="history_period"
-                                    class="mb-2 block text-xs font-bold uppercase tracking-[0.16em] text-[#5f7598]">
-                                    Period
+                                    class="mb-1.5 block text-xs font-bold uppercase tracking-wider text-[#73594b]">
+                                    Time Period
                                 </label>
                                 <select id="history_period" name="period"
-                                    class="h-[52px] w-full rounded-2xl border border-[#ead8cb] bg-white px-4 text-sm font-medium text-[#2f241f] shadow-sm outline-none transition hover:border-[#dfc4b2] focus:border-[#f4a06b] focus:ring-4 focus:ring-[#f4a06b]/15">
+                                    class="w-full rounded-xl border border-[#ebdcd2] bg-[#fbf8f5] px-4 py-3 text-xs font-semibold text-[#2c221e] outline-none transition focus:border-[#b45309] focus:ring-2 focus:ring-[#b45309]/15">
                                     <option value="day" {{ $period === 'day' ? 'selected' : '' }}>Today</option>
                                     <option value="week" {{ $period === 'week' ? 'selected' : '' }}>This Week</option>
                                     <option value="month" {{ $period === 'month' ? 'selected' : '' }}>This Month</option>
@@ -128,29 +128,29 @@
                             </div>
                             <div>
                                 <label for="history_payment"
-                                    class="mb-2 block text-xs font-bold uppercase tracking-[0.16em] text-[#5f7598]">
-                                    Payment
+                                    class="mb-1.5 block text-xs font-bold uppercase tracking-wider text-[#73594b]">
+                                    Payment Method
                                 </label>
                                 <select id="history_payment" name="payment"
-                                    class="h-[52px] w-full rounded-2xl border border-[#ead8cb] bg-white px-4 text-sm font-medium text-[#2f241f] shadow-sm outline-none transition hover:border-[#dfc4b2] focus:border-[#f4a06b] focus:ring-4 focus:ring-[#f4a06b]/15">
-                                    <option value="all" {{ $selectedPayment === 'all' ? 'selected' : '' }}>All</option>
+                                    class="w-full rounded-xl border border-[#ebdcd2] bg-[#fbf8f5] px-4 py-3 text-xs font-semibold text-[#2c221e] outline-none transition focus:border-[#b45309] focus:ring-2 focus:ring-[#b45309]/15">
+                                    <option value="all" {{ $selectedPayment === 'all' ? 'selected' : '' }}>All Methods</option>
                                     @foreach ($paymentOptions as $paymentOption)
                                         @php $paymentValue = strtolower((string) $paymentOption); @endphp
                                         <option value="{{ $paymentValue }}"
                                             {{ $selectedPayment === $paymentValue ? 'selected' : '' }}>
-                                            {{ str($paymentValue)->replace('_', ' ')->headline() }}
+                                            {{ $paymentValue === 'qr' ? 'KHQR / Bakong' : str($paymentValue)->replace('_', ' ')->headline() }}
                                         </option>
                                     @endforeach
                                 </select>
                             </div>
                             <div>
                                 <label for="history_status"
-                                    class="mb-2 block text-xs font-bold uppercase tracking-[0.16em] text-[#5f7598]">
-                                    Status
+                                    class="mb-1.5 block text-xs font-bold uppercase tracking-wider text-[#73594b]">
+                                    Order Status
                                 </label>
                                 <select id="history_status" name="status"
-                                    class="h-[52px] w-full rounded-2xl border border-[#ead8cb] bg-white px-4 text-sm font-medium text-[#2f241f] shadow-sm outline-none transition hover:border-[#dfc4b2] focus:border-[#f4a06b] focus:ring-4 focus:ring-[#f4a06b]/15">
-                                    <option value="all" {{ $selectedStatus === 'all' ? 'selected' : '' }}>All</option>
+                                    class="w-full rounded-xl border border-[#ebdcd2] bg-[#fbf8f5] px-4 py-3 text-xs font-semibold text-[#2c221e] outline-none transition focus:border-[#b45309] focus:ring-2 focus:ring-[#b45309]/15">
+                                    <option value="all" {{ $selectedStatus === 'all' ? 'selected' : '' }}>All Statuses</option>
                                     @foreach ($statusOptions as $statusOption)
                                         @php $statusOptionValue = strtolower((string) $statusOption); @endphp
                                         <option value="{{ $statusOptionValue }}"
@@ -160,39 +160,33 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="grid grid-cols-2 gap-3 pt-2">
+                            <div class="grid grid-cols-2 gap-3 pt-4 border-t border-[#ebdcd2]/60">
                                 <a href="{{ route('cashier.history') }}"
-                                    class="inline-flex h-[52px] items-center justify-center rounded-2xl border border-[#e7d7cb] bg-white px-4 text-sm font-bold text-[#7a5c4e] shadow-sm transition hover:-translate-y-0.5 hover:bg-[#fff6f0] focus:outline-none focus:ring-2 focus:ring-[#f4a06b]/25">
+                                    class="inline-flex items-center justify-center rounded-xl border border-[#ebdcd2] bg-[#fbf5f0] py-3 text-xs font-bold text-[#665044] transition hover:bg-white">
                                     Reset
                                 </a>
                                 <button type="submit"
-                                    class="inline-flex h-[52px] items-center justify-center rounded-2xl bg-[#2f241f] px-4 text-sm font-bold text-white shadow-[0_12px_22px_rgba(47,36,31,0.22)] transition hover:-translate-y-0.5 hover:bg-[#3c2f29] hover:shadow-[0_16px_28px_rgba(47,36,31,0.28)] focus:outline-none focus:ring-2 focus:ring-[#2f241f]/25">
-                                    Apply
+                                    class="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-[#e07a3c] to-[#b45309] py-3 text-xs font-bold text-white shadow-md shadow-orange-900/15 transition hover:from-[#d16c2e] hover:to-[#92400e]">
+                                    Apply Filter
                                 </button>
                             </div>
                         </form>
                     </div>
 
-                    <div class="overflow-hidden rounded-[24px] border border-[#f0e3da] bg-white">
-                        <div class="coffee-table-scroll overflow-x-auto">
-                            <table class="min-w-[620px] w-full table-fixed text-left text-sm">
-                                <colgroup>
-                                    <col class="w-[42%]">
-                                    <col class="w-[18%]">
-                                    <col class="w-[12%]">
-                                    <col class="w-[14%]">
-                                    <col class="w-[14%]">
-                                </colgroup>
-                                <thead class="bg-[#fff6f0] text-[#7a5c4e]">
+                    <!-- Orders Table -->
+                    <div class="overflow-hidden rounded-2xl border border-[#ebdcd2]/80 bg-white">
+                        <div class="coffee-table-scroll custom-scrollbar overflow-x-auto">
+                            <table class="min-w-[650px] w-full text-left text-xs">
+                                <thead class="bg-[#fcfaf7] text-[#73594b] border-b border-[#ebdcd2]">
                                     <tr>
-                                        <th class="px-4 py-3 font-semibold">Order</th>
-                                        <th class="px-4 py-3 font-semibold">Status</th>
-                                        <th class="px-4 py-3 font-semibold">Items</th>
-                                        <th class="px-4 py-3 font-semibold">Payment</th>
-                                        <th class="px-4 py-3 font-semibold">Total</th>
+                                        <th class="px-5 py-3.5 font-bold uppercase tracking-wider text-[11px]">Order #</th>
+                                        <th class="px-5 py-3.5 font-bold uppercase tracking-wider text-[11px]">Status</th>
+                                        <th class="px-5 py-3.5 font-bold uppercase tracking-wider text-[11px]">Items</th>
+                                        <th class="px-5 py-3.5 font-bold uppercase tracking-wider text-[11px]">Payment</th>
+                                        <th class="px-5 py-3.5 font-bold uppercase tracking-wider text-[11px]">Total</th>
                                     </tr>
                                 </thead>
-                                <tbody class="divide-y divide-[#f4e8df]">
+                                <tbody class="divide-y divide-[#ebdcd2]/60">
                                     @forelse ($orders as $order)
                                         @php
                                             $orderNumber = (string) ($order->order_number ?? '-');
@@ -207,14 +201,14 @@
                                                         : '-');
                                             $statusValue = strtolower((string) ($order->status ?? 'completed'));
                                             $statusClasses = match ($statusValue) {
-                                                'completed', 'paid' => 'bg-emerald-100 text-emerald-700',
-                                                'pending', 'processing' => 'bg-amber-100 text-amber-700',
+                                                'completed', 'paid' => 'bg-emerald-100 text-emerald-800 ring-1 ring-emerald-200',
+                                                'pending', 'processing' => 'bg-amber-100 text-amber-800 ring-1 ring-amber-200',
                                                 'failed',
                                                 'cancelled',
                                                 'canceled',
                                                 'refunded'
-                                                    => 'bg-rose-100 text-rose-700',
-                                                default => 'bg-slate-200 text-slate-700',
+                                                    => 'bg-rose-100 text-rose-800 ring-1 ring-rose-200',
+                                                default => 'bg-slate-100 text-slate-700 ring-1 ring-slate-200',
                                             };
                                             $itemNames = collect($order->items ?? [])
                                                 ->pluck('product_name')
@@ -228,37 +222,49 @@
                                                 $itemNamePreview .= ' +' . $extraItemCount . ' more';
                                             }
                                         @endphp
-                                        <tr class="align-middle transition hover:bg-[#fffaf6]">
-                                            <td class="px-4 py-4">
-                                                <p class="truncate font-bold text-[#2f241f]" title="{{ $orderNumber }}">
-                                                    {{ $orderNumber }}</p>
-                                                <p class="mt-1 text-xs text-slate-500">{{ $formattedOrderDate }}</p>
-                                                <p class="mt-2 truncate text-xs text-slate-600"
-                                                    title="{{ $itemNamePreview }}">
-                                                    <span class="font-semibold text-[#7a5c4e]">Items:</span>
+                                        <tr class="align-middle transition-colors hover:bg-[#fcfaf7]">
+                                            <td class="px-5 py-4">
+                                                <p class="font-extrabold text-[#2c221e] text-sm" title="{{ $orderNumber }}">
+                                                    {{ $orderNumber }}
+                                                </p>
+                                                <p class="text-[11px] text-[#8a7265] mt-0.5">{{ $formattedOrderDate }}</p>
+                                                <p class="mt-1 text-[11px] text-[#665044] truncate" title="{{ $itemNamePreview }}">
+                                                    <span class="font-bold text-[#b45309]">Ordered:</span>
                                                     {{ $itemNamePreview }}
                                                 </p>
                                             </td>
-                                            <td class="px-4 py-4">
-                                                <span
-                                                    class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] {{ $statusClasses }}">
+                                            <td class="px-5 py-4">
+                                                <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider {{ $statusClasses }}">
                                                     {{ str((string) ($order->status ?? 'completed'))->replace('_', ' ')->headline() }}
                                                 </span>
                                             </td>
-                                            <td class="px-4 py-4 font-bold text-[#2f241f]">
-                                                {{ number_format($itemsCount) }}
+                                            <td class="px-5 py-4 font-bold text-[#2c221e]">
+                                                {{ number_format($itemsCount) }} {{ Str::plural('cup', $itemsCount) }}
                                             </td>
-                                            <td class="px-4 py-4 font-bold text-[#2f241f]">
-                                                {{ str((string) ($order->payment_method ?? 'unknown'))->replace('_', ' ')->headline() }}
+                                            <td class="px-5 py-4 font-semibold text-[#665044]">
+                                                <span class="inline-flex items-center gap-1 rounded-md bg-[#f4ebe3] px-2 py-0.5 text-[11px] font-bold text-[#73594b]">
+                                                    {{ $order->payment_method === 'qr' ? 'KHQR' : str((string) ($order->payment_method ?? 'cash'))->replace('_', ' ')->headline() }}
+                                                    @if ($currency = data_get($order->payment_details, 'currency'))
+                                                        · {{ $currency === 'MIXED' ? 'USD + KHR' : $currency }}
+                                                    @endif
+                                                </span>
+                                                @if ($reference = data_get($order->payment_details, 'reference'))
+                                                    <p class="mt-1 max-w-44 truncate text-[10px] font-normal text-[#8a7265]" title="{{ $reference }}">Ref: {{ $reference }}</p>
+                                                @endif
+                                                @if ((float) data_get($order->payment_details, 'change_given', 0) > 0)
+                                                    <p class="mt-1 text-[10px] font-normal text-[#8a7265]">Change:
+                                                        {{ data_get($order->payment_details, 'change_currency') === 'KHR' ? '៛'.number_format(data_get($order->payment_details, 'change_given')) : '$'.number_format(data_get($order->payment_details, 'change_given'), 2) }}
+                                                    </p>
+                                                @endif
                                             </td>
-                                            <td class="px-4 py-4 font-bold text-emerald-700">
+                                            <td class="px-5 py-4 font-black text-sm text-[#b45309]">
                                                 ${{ number_format((float) $order->total, 2) }}
                                             </td>
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="5" class="px-4 py-10 text-center text-sm text-[#8b6a59]">
-                                                No order history found with the current filters.
+                                            <td colspan="5" class="px-5 py-12 text-center text-xs text-[#8a7265]">
+                                                No order transactions found with the current filters.
                                             </td>
                                         </tr>
                                     @endforelse
@@ -275,6 +281,7 @@
                 @endif
             </main>
 
+            <!-- Right Cart Sidebar -->
             @include('cashier.sidebar.cart', ['activeCashierMenu' => 'cart'])
         </div>
     </div>
